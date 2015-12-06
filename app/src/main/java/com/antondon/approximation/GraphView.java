@@ -5,76 +5,180 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+
+import java.util.ArrayList;
 
 public class GraphView extends View {
 
     Paint paint = new Paint();
     private int width, height;
     private float padding_dp = 30f;
-    private final float scale;
+    private float scale;
+    private Canvas canvas = null;
+
+    int divisionStep;
+    //Coordinates of the borders of the system of axes area
+    private int xStartSOA, xEndSOA, yStartSOA, yEndSOA;
+
+    private float pointX = 0, pointY = 0;
+    private int padding;
+    private int arrowShift;
+    private int divisionShift;
+    private int divisionCount;
+    private int textShift;
+    private int textSize;
+
+    private boolean variablesInitialized = false;
+    Point[] points = new Point[6];
+    int currentPoint;
 
     public GraphView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        scale = getResources().getDisplayMetrics().density;
+        initVariables();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        drawCoordinateSystem(canvas);
+        if (this.canvas == null)
+            this.canvas = canvas;
+        if (!variablesInitialized){
+            initVariables();
+            variablesInitialized = true;
+        }
+
+        canvas.drawColor(Color.WHITE);
+        drawAxisSystem();
+        for (int i = 0; i < 6; i++)
+        {
+            if (points[i].getX() != 0 && points[i].getY() != 0)
+                drawPoint(points[i]);
+        }
     }
 
-    private void drawCoordinateSystem(Canvas canvas){
-        canvas.drawColor(Color.WHITE);
-        paint.setColor(Color.BLACK);
-        paint.setStrokeWidth(1);
+    private void drawPoint(Point point){
+        Paint pointPaint = new Paint();
+        pointPaint.setColor(Color.RED);
+        pointPaint.setStrokeWidth(3);
+        canvas.drawPoint(point.getX(), point.getY(), pointPaint);
+    }
 
+
+    //Initializing fields
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        initVariables();
+    }
+
+
+    //Indicate current point
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Point point = null;
+        float x = event.getX();
+        float y = event.getY();
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                //Point in range of axis system
+                if (x > xStartSOA && x < xEndSOA && y > yStartSOA && y < yEndSOA) {
+                    for (int i = 0; i < 5; i++) {
+                        float rangeStart = (i + 0.5f) * divisionStep;
+                        float rangeEnd = (i + 1.5f) * divisionStep;
+                        if ((x >= xStartSOA + rangeStart) && (x < xStartSOA + rangeEnd)) {
+                            points[i].setXY((i + 1) * divisionStep + xStartSOA, y);
+                            currentPoint = i;
+                        }
+                    }
+                    invalidate();
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                //if x in range of current point redraw it
+                if (x > points[currentPoint].getX() - divisionStep * 1f / 2 && x <= points[currentPoint].getX() + divisionStep * 1f / 2){
+                    points[currentPoint].setXY((currentPoint + 1) * divisionStep + xStartSOA, y);
+                    invalidate();
+                }
+
+                break;
+            case MotionEvent.ACTION_UP:
+                break;
+        }
+        return true;
+    }
+
+    //Init variables and constants
+    private void initVariables(){
+        scale = getResources().getDisplayMetrics().density;
         height = getHeight();
         width = getWidth();
 
-        int padding = dpsToPixels(padding_dp);
-        int axisShift = dpsToPixels(10f);
-        int arrowShift = dpsToPixels(5f);
-        int divisionShift = dpsToPixels(7f);
+        //rename padding
+        padding = dpsToPixels(padding_dp);
+        arrowShift = dpsToPixels(5f);
+        divisionShift = dpsToPixels(7f);
+
+        xStartSOA = padding;
+        xEndSOA = width - padding;
+        yStartSOA = padding;
+        yEndSOA = height - padding;
+
+        divisionCount = 6;
+        divisionStep = (width - padding * 2 - arrowShift * 2) / divisionCount;
+        textShift = dpsToPixels(7f);
+        textSize = dpsToPixels(14f);
+
+        for (int i = 0; i < 6; i++){
+            points[i] = new Point(0, 0);
+        }
+    }
+
+    private void drawAxisSystem(){
+        paint.setColor(Color.BLACK);
+        paint.setStrokeWidth(1);
 
         //Draw coordinate axis
-        canvas.drawLine(padding, padding, padding, height - padding + axisShift, paint);
-        canvas.drawLine(padding - axisShift, height - padding, width - padding, height - padding, paint);
+        canvas.drawLine(xStartSOA, yStartSOA, xStartSOA, yEndSOA, paint);
+        canvas.drawLine(xStartSOA, yEndSOA, xEndSOA, yEndSOA, paint);
 
         //Draw arrows
-        canvas.drawLine(padding, padding, padding + arrowShift, padding + arrowShift, paint);
-        canvas.drawLine(padding, padding, padding - arrowShift, padding + arrowShift, paint);
-        canvas.drawLine(width - padding, height - padding, width - padding - arrowShift, height - padding - arrowShift, paint);
-        canvas.drawLine(width - padding, height - padding, width - padding - arrowShift, height - padding + arrowShift, paint);
+        canvas.drawLine(xStartSOA, yStartSOA, xStartSOA + arrowShift, yStartSOA + arrowShift, paint);
+        canvas.drawLine(xStartSOA, yStartSOA, xStartSOA - arrowShift, yStartSOA + arrowShift, paint);
+        canvas.drawLine(xEndSOA, yEndSOA, xEndSOA - arrowShift, yEndSOA - arrowShift, paint);
+        canvas.drawLine(xEndSOA, yEndSOA, xEndSOA - arrowShift, yEndSOA + arrowShift, paint);
 
         //Draw divisions
-        int divisionStep = (width - padding * 2 - arrowShift * 2) / 6;
-        int textShift = dpsToPixels(7f);
-        int textSize = dpsToPixels(14f);
         paint.setTextSize(textSize);
         paint.setTextAlign(Paint.Align.CENTER);
 
         //X-axis
-        for (int i = 1; i < (width - padding) / divisionStep; i++){
-            int startX = padding + divisionStep * i;
-            int startY = height - padding - divisionShift;
-            int stopX = padding + divisionStep * i;
-            int stopY = height - padding + divisionShift;
+        canvas.drawText(Integer.toString(0), xStartSOA, yEndSOA + divisionShift + textShift + textSize / 2, paint);
+        for (int i = 0; i <= (width - padding * 2) / divisionStep; i++){
+            int startX = xStartSOA + divisionStep * i;
+            int startY = yEndSOA - divisionShift;
+            int stopX = xStartSOA + divisionStep * i;
+            int stopY = yEndSOA + divisionShift;
 
             canvas.drawLine(startX, startY, stopX, stopY, paint);
             canvas.drawText(Integer.toString(i), startX, stopY + textShift + textSize / 2, paint);
-}
+        }
 
         //Y-axis
-        for (int i = 1; i < (height - padding) / divisionStep; i++){
-            int startX = padding - divisionShift;
-            int startY =  height - padding - divisionStep * i;
-            int stopX = padding + divisionShift;
-            int stopY = height - padding - divisionStep * i;
-
-            canvas.drawLine(startX, startY,stopX, stopY, paint);
-            canvas.drawText(Integer.toString(i), startX - textShift, stopY + textSize / 2, paint);
+        for (int i = 0; i <= (height - padding * 2) / divisionStep; i++){
+            int startX = xStartSOA - divisionShift;
+            int startY =  yEndSOA - divisionStep * i;
+            int stopX = xStartSOA + divisionShift;
+            int stopY = yEndSOA - divisionStep * i;
+            canvas.drawLine(startX, startY, stopX, stopY, paint);
+            if (i != 0)
+                canvas.drawText(Integer.toString(i), startX - textShift, stopY + textSize / 2, paint);
         }
+    }
+
+    private void drawGraph(){
+
     }
 
     private int dpsToPixels(float dps){
