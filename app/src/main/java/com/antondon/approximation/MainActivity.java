@@ -2,10 +2,10 @@ package com.antondon.approximation;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
-public class MainActivity extends Activity implements View.OnTouchListener, View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     private GraphView graphView;
 
@@ -13,39 +13,30 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        graphView = (GraphView)findViewById(R.id.graphView);
-        graphView.setOnTouchListener(this);
+        graphView = (GraphView) findViewById(R.id.graphView);
         findViewById(R.id.btnLeastSquares).setOnClickListener(this);
         findViewById(R.id.btnLagrangePolynomial).setOnClickListener(this);
         findViewById(R.id.btnClear).setOnClickListener(this);
     }
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        switch (v.getId()){
-            case R.id.graphView:
-                switch (event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        graphView.setCurrentPointIndex(event.getX());
-                        graphView.initPoint(event.getX(), event.getY());
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        graphView.movePoint(event.getY());
-                        break;
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btnLeastSquares:
+                if (graphView.checkPointCount()) {
+                    graphView.leastSquaresApproximation();
+                    graphView.invalidate();
+                } else {
+                    Toast.makeText(this, getResources().getString(R.string.define_all_points), Toast.LENGTH_SHORT).show();
                 }
                 break;
-        }
-        return true;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.btnLeastSquares:
-                graphView.leastSquaresApproximation();
-                break;
             case R.id.btnLagrangePolynomial:
-                graphView.lagrangeApproximation();
+                if (graphView.checkPointCount()) {
+                    graphView.lagrangeApproximation();
+                    graphView.invalidate();
+                } else {
+                    Toast.makeText(this, getResources().getString(R.string.define_all_points), Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.btnClear:
                 graphView.clear();

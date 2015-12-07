@@ -4,4 +4,5 @@
     <string name="least_squares">Least squares</string>
     <string name="lagrange_polynomial">Lagrange polynomial</string>
     <string name="clear">Clear</string>
+    <string name="define_all_points">You should define all 5 points</string>
 </resources>
