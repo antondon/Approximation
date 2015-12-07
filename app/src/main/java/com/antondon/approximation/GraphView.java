@@ -27,15 +27,10 @@ public class GraphView extends View {
     private boolean variablesInitialized = false;
     Point[] points = new Point[5];
 
-
     public GraphView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        initVariables();
-    }
 
     //Init variables and constants
     private void initVariables() {
@@ -137,27 +132,35 @@ public class GraphView extends View {
 
 
     private void drawLeastSquaresPath(Canvas canvas){
+        if (leastSquaresPath.isEmpty())
+            return;
         Paint leastSquaresPaint = new Paint();
         leastSquaresPaint.setStyle(Paint.Style.STROKE);
         leastSquaresPaint.setAntiAlias(true);
         leastSquaresPaint.setColor(Color.BLUE);
         leastSquaresPaint.setStrokeWidth(2);
 
-        if (!leastSquaresPath.isEmpty())
-            canvas.drawPath(leastSquaresPath, leastSquaresPaint);
+        drawLeastSquaresApproximation();
+        canvas.drawPath(leastSquaresPath, leastSquaresPaint);
+    }
+
+    public void clear(){
+        initVariables();
+        invalidate();
     }
 
     private void drawLagrangePath(Canvas canvas){
+        if (lagrangePath.isEmpty())
+            return;
         Paint lagrangePaint = new Paint();
         lagrangePaint.setStyle(Paint.Style.STROKE);
         lagrangePaint.setAntiAlias(true);
         lagrangePaint.setColor(Color.GREEN);
         lagrangePaint.setStrokeWidth(2);
-        if (!lagrangePath.isEmpty())
-            canvas.drawPath(lagrangePath, lagrangePaint);
+
+        drawLagrangeApproximation();
+        canvas.drawPath(lagrangePath, lagrangePaint);
     }
-
-
 
     public void setCurrentPointIndex(float x) {
         for (int i = 0; i  < points.length; i++){

@@ -1,15 +1,12 @@
 package com.antondon.approximation;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 
 public class MainActivity extends Activity implements View.OnTouchListener, View.OnClickListener {
 
-    private String TAG = "canvas size";
     private GraphView graphView;
 
     @Override
@@ -18,10 +15,9 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
         setContentView(R.layout.activity_main);
         graphView = (GraphView)findViewById(R.id.graphView);
         graphView.setOnTouchListener(this);
-        Button btnLeastSquared = (Button) findViewById(R.id.btnLeastSquares);
-        Button btnLagrangePolynomial = (Button) findViewById(R.id.btnLagrangePolynomial);
-        btnLeastSquared.setOnClickListener(this);
-        btnLagrangePolynomial.setOnClickListener(this);
+        findViewById(R.id.btnLeastSquares).setOnClickListener(this);
+        findViewById(R.id.btnLagrangePolynomial).setOnClickListener(this);
+        findViewById(R.id.btnClear).setOnClickListener(this);
     }
 
     @Override
@@ -51,6 +47,8 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
             case R.id.btnLagrangePolynomial:
                 graphView.drawLagrangeApproximation();
                 break;
+            case R.id.btnClear:
+                graphView.clear();
         }
 
     }
