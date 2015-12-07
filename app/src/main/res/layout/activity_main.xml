@@ -1,37 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/white">
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
     <com.antondon.approximation.GraphView
+        android:id="@+id/graphView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:id="@+id/graphView"/>
+        android:layout_weight="1"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <Button
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
             android:id="@+id/btnLeastSquares"
-            android:text="Least squares"
-            android:layout_weight="1"/>
-        <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/least_squares" />
+
+        <Button
             android:id="@+id/btnLagrangePolynomial"
-            android:text="Lagrange polynomial"
-            android:layout_weight="1"/>
-        <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/lagrange_polynomial" />
+
+        <Button
             android:id="@+id/btnClear"
-            android:text="Clear"
-            android:layout_weight="1"/>
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/clear" />
     </LinearLayout>
 </LinearLayout>

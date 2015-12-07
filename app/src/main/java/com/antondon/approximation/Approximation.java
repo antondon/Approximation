@@ -2,20 +2,18 @@ package com.antondon.approximation;
 
 public class Approximation {
 
-    private static float roundScale = 1000f;
+    private static final float ROUND_SCALE = 1000f;
     private static float[][] matrix = new float[4][5];
 
     public static float[][] getLeastSquaredMatrix(Point[] points) {
         float[] X = new float[points.length];
         float[] Y = new float[points.length];
-        for (int i = 0; i < points.length; i++)
-        {
+        for (int i = 0; i < points.length; i++) {
             X[i] = points[i].getX();
             Y[i] = points[i].getY();
         }
         for (int i = 0; i < 4; i++)
-            for (int k = 0; k < 4; k++)
-            {
+            for (int k = 0; k < 4; k++) {
                 matrix[i][k] = sum(X, i + k);
             }
         for (int i = 0; i < 4; i++)
@@ -53,12 +51,12 @@ public class Approximation {
                 if (j != i)
                     // k - column
                     for (int k = 0; k <= n; k++)
-                        matrix[j][k] = Math.round((matrix[j][k] - matrix[i][k] * M) * roundScale) / roundScale;
+                        matrix[j][k] = Math.round((matrix[j][k] - matrix[i][k] * M) * ROUND_SCALE) / ROUND_SCALE;
             }
         }
         //Getting approximation params
         for (int i = 0; i < n; i++)
-            params[i] = Math.round(matrix[i][n] / matrix[i][i] * roundScale) / roundScale;
+            params[i] = Math.round(matrix[i][n] / matrix[i][i] * ROUND_SCALE) / ROUND_SCALE;
         return params;
     }
 
@@ -66,13 +64,13 @@ public class Approximation {
         return (float) (params[0] + params[1] * x + params[2] * Math.pow(x, 2) + params[3] * Math.pow(x, 3));
     }
 
-    public static float lagrangePolynomial(float a, Point[] points){
+    public static float lagrangePolynomial(float a, Point[] points) {
         float result = 0;
         float product;
-        for (int i = 0; i < points.length; i++){
+        for (int i = 0; i < points.length; i++) {
             //Y[i]
             product = 1;
-            for (int j = 0; j < points.length; j++ ){
+            for (int j = 0; j < points.length; j++) {
                 if (j != i)
                     product *= (a - points[j].getX()) / (points[i].getX() - points[j].getX());
             }

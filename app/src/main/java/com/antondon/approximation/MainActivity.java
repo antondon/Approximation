@@ -42,14 +42,13 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btnLeastSquares:
-                graphView.drawLeastSquaresApproximation();
+                graphView.leastSquaresApproximation();
                 break;
             case R.id.btnLagrangePolynomial:
-                graphView.drawLagrangeApproximation();
+                graphView.lagrangeApproximation();
                 break;
             case R.id.btnClear:
                 graphView.clear();
         }
-
     }
 }
