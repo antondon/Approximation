@@ -6,34 +6,27 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 public class GraphView extends View {
 
-    Paint paint = new Paint();
     private int width, height;
     private float padding_dp = 30f;
     private float scale;
-    private Canvas canvas = null;
-    private Path leastSquaresPath;
+    private Path leastSquaresPath, lagrangePath;
 
     int divisionStep;
     //Coordinates of the borders of the system of axes area
     private int xStartSOA, xEndSOA, yStartSOA, yEndSOA;
 
-    private float pointX = 0, pointY = 0;
-    private int padding;
-    private int arrowShift;
-    private int divisionShift;
+    private int padding, arrowShift, divisionShift, textShift, textSize;
     private int divisionCount;
-    private int textShift;
-    private int textSize;
     private int currentPointIndex;
 
     private boolean variablesInitialized = false;
     Point[] points = new Point[5];
+
 
     public GraphView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -51,6 +44,7 @@ public class GraphView extends View {
         width = getWidth();
 
         leastSquaresPath = new Path();
+        lagrangePath = new Path();
 
         //rename padding
         padding = dpsToPixels(padding_dp);
@@ -72,7 +66,8 @@ public class GraphView extends View {
         }
     }
 
-    private void drawAxisSystem() {
+    private void drawAxisSystem(Canvas canvas) {
+        Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         paint.setStrokeWidth(1);
 
@@ -117,8 +112,6 @@ public class GraphView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (this.canvas == null)
-            this.canvas = canvas;
         if (!variablesInitialized) {
             initVariables();
             variablesInitialized = true;
@@ -126,12 +119,13 @@ public class GraphView extends View {
 
         canvas.drawColor(Color.WHITE);
 
-        drawAxisSystem();
-        drawLeastSquaresPath();
-        drawPoints();
+        drawAxisSystem(canvas);
+        drawLeastSquaresPath(canvas);
+        drawLagrangePath(canvas);
+        drawPoints(canvas);
     }
 
-    private void drawPoints(){
+    private void drawPoints(Canvas canvas){
         Paint pointPaint = new Paint();
         pointPaint.setColor(Color.RED);
         pointPaint.setStrokeWidth(3);
@@ -140,7 +134,9 @@ public class GraphView extends View {
                 canvas.drawPoint(points[i].getX(), points[i].getY(), pointPaint);
     }
 
-    private void drawLeastSquaresPath(){
+
+
+    private void drawLeastSquaresPath(Canvas canvas){
         Paint leastSquaresPaint = new Paint();
         leastSquaresPaint.setStyle(Paint.Style.STROKE);
         leastSquaresPaint.setAntiAlias(true);
@@ -150,6 +146,18 @@ public class GraphView extends View {
         if (!leastSquaresPath.isEmpty())
             canvas.drawPath(leastSquaresPath, leastSquaresPaint);
     }
+
+    private void drawLagrangePath(Canvas canvas){
+        Paint lagrangePaint = new Paint();
+        lagrangePaint.setStyle(Paint.Style.STROKE);
+        lagrangePaint.setAntiAlias(true);
+        lagrangePaint.setColor(Color.GREEN);
+        lagrangePaint.setStrokeWidth(2);
+        if (!lagrangePath.isEmpty())
+            canvas.drawPath(lagrangePath, lagrangePaint);
+    }
+
+
 
     public void setCurrentPointIndex(float x) {
         for (int i = 0; i  < points.length; i++){
@@ -177,7 +185,7 @@ public class GraphView extends View {
     }
 
     public void movePoint(float y){
-        if (currentPointIndex != -1)
+        if (currentPointIndex != -1 && y > yStartSOA && y < yEndSOA)
         {
             points[currentPointIndex].setXY((currentPointIndex + 1) * divisionStep + xStartSOA, y);
             invalidate();
@@ -204,13 +212,33 @@ public class GraphView extends View {
         Point[] relativeCoordinates =  getRelativeCoordinates(points);
         float[] leastSquaresParams = Approximation.getLeastSquaredParams(relativeCoordinates);
         float x = xStartSOA + divisionStep;
-        float y = Approximation.leastSquaredFunction(leastSquaresParams, getRelativeX(x));
+        float y = Approximation.leastSquaredPolynomial(leastSquaresParams, getRelativeX(x));
         leastSquaresPath.reset();
         leastSquaresPath.moveTo(x, getAbsoluteY(y));
         while (x < xStartSOA + divisionStep * 5){
             x++;
-            y = Approximation.leastSquaredFunction(leastSquaresParams, getRelativeX(x));
+            y = Approximation.leastSquaredPolynomial(leastSquaresParams, getRelativeX(x));
             leastSquaresPath.lineTo(x, getAbsoluteY(y));
+        }
+        invalidate();
+    }
+
+    public void drawLagrangeApproximation(){
+        for (int i = 0; i < points.length; i++)
+            if (points[i].getX() == 0 && points[i].getY() == 0)
+            {
+                Toast.makeText(getContext(), "You should define all 5 points", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        Point[] relativeCoordinates =  getRelativeCoordinates(points);
+        float x = xStartSOA + divisionStep;
+        float y = Approximation.lagrangePolynomial(getRelativeX(x), relativeCoordinates);
+        lagrangePath.reset();
+        lagrangePath.moveTo(x, getAbsoluteY(y));
+        while (x < xStartSOA + divisionStep * 5){
+            x++;
+            y = Approximation.lagrangePolynomial(getRelativeX(x), relativeCoordinates);
+            lagrangePath.lineTo(x, getAbsoluteY(y));
         }
         invalidate();
     }

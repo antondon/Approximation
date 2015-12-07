@@ -25,10 +25,10 @@ public class Approximation {
 
     //Simple sum method
     private static float sum(float[] values, int exponent) {
-        float sum = 0;
+        float result = 0;
         for (float value : values)
-            sum += Math.pow(value, exponent);
-        return sum;
+            result += Math.pow(value, exponent);
+        return result;
     }
 
     //Sum method method for two vectors
@@ -62,7 +62,22 @@ public class Approximation {
         return params;
     }
 
-    public static float leastSquaredFunction(float[] params, float x) {
+    public static float leastSquaredPolynomial(float[] params, float x) {
         return (float) (params[0] + params[1] * x + params[2] * Math.pow(x, 2) + params[3] * Math.pow(x, 3));
+    }
+
+    public static float lagrangePolynomial(float a, Point[] points){
+        float result = 0;
+        float product;
+        for (int i = 0; i < points.length; i++){
+            //Y[i]
+            product = 1;
+            for (int j = 0; j < points.length; j++ ){
+                if (j != i)
+                    product *= (a - points[j].getX()) / (points[i].getX() - points[j].getX());
+            }
+            result += points[i].getY() * product;
+        }
+        return result;
     }
 }

@@ -19,7 +19,9 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
         graphView = (GraphView)findViewById(R.id.graphView);
         graphView.setOnTouchListener(this);
         Button btnLeastSquared = (Button) findViewById(R.id.btnLeastSquares);
+        Button btnLagrangePolynomial = (Button) findViewById(R.id.btnLagrangePolynomial);
         btnLeastSquared.setOnClickListener(this);
+        btnLagrangePolynomial.setOnClickListener(this);
     }
 
     @Override
@@ -45,6 +47,9 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
         switch (v.getId()){
             case R.id.btnLeastSquares:
                 graphView.drawLeastSquaresApproximation();
+                break;
+            case R.id.btnLagrangePolynomial:
+                graphView.drawLagrangeApproximation();
                 break;
         }
 
